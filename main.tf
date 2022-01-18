@@ -7,36 +7,24 @@ terraform {
   }
 }
 
-# Create a resource group
 resource "azurerm_resource_group" "example" {
   name     = var.resource_group_name
   location = var.location
   tags     = var.resource_group_tags
 }
 
-# Create a virtual network within the resource group
+
+
+#
+# Networking
+#
+
 resource "azurerm_virtual_network" "example" {
   name                = "strawb-network"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
   address_space       = var.vnet_address_space
 }
-
-
-
-#
-# SSH Key
-#
-
-resource "tls_private_key" "example" {
-  algorithm = "RSA"
-}
-
-
-
-#
-# Example from https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine
-#
 
 resource "azurerm_subnet" "example" {
   name                 = "internal"
@@ -66,11 +54,54 @@ resource "azurerm_network_interface" "example" {
   }
 }
 
+resource "azurerm_network_security_group" "example" {
+  name                = "http_and_ssh"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+
+  security_rule {
+    name                       = "AllowHTTPInBound"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "TCP"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "AllowSSHInBound"
+    priority                   = 120
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "TCP"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_network_interface_security_group_association" "example" {
+  network_interface_id      = azurerm_network_interface.example.id
+  network_security_group_id = azurerm_network_security_group.example.id
+}
+
+#
+# Virtual Machine
+#
+
 locals {
   custom_data = <<CUSTOM_DATA
 #!/bin/sh
 apt-get -y install nginx
 CUSTOM_DATA
+}
+
+resource "tls_private_key" "example" {
+  algorithm = "RSA"
 }
 
 resource "azurerm_linux_virtual_machine" "example" {
@@ -102,9 +133,6 @@ resource "azurerm_linux_virtual_machine" "example" {
 
   custom_data = base64encode(local.custom_data)
 }
-
-# TODO: Security groups to grant access to VM
-
 
 # TODO: Load Balancer for web traffic?
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/lb
