@@ -93,15 +93,21 @@ resource "azurerm_network_interface_security_group_association" "example" {
 # Virtual Machine
 #
 
-locals {
-  custom_data = <<CUSTOM_DATA
-#!/bin/sh
-apt-get -y install nginx
-CUSTOM_DATA
-}
-
 resource "tls_private_key" "example" {
   algorithm = "RSA"
+}
+
+
+data "hcp_packer_iteration" "webserver" {
+  bucket_name = var.packer_bucket_name
+  channel     = var.packer_channel
+}
+
+data "hcp_packer_image" "webserver" {
+  bucket_name    = var.packer_bucket_name
+  cloud_provider = "azure"
+  iteration_id   = data.hcp_packer_iteration.webserver.ulid
+  region         = "uksouth" // TODO: the image is only published to this region currently
 }
 
 resource "azurerm_linux_virtual_machine" "example" {
@@ -124,14 +130,7 @@ resource "azurerm_linux_virtual_machine" "example" {
     storage_account_type = "Standard_LRS"
   }
 
-  source_image_reference {
-    publisher = var.virtual_machine_source.publisher
-    offer     = var.virtual_machine_source.offer
-    sku       = var.virtual_machine_source.sku
-    version   = var.virtual_machine_source.version
-  }
-
-  custom_data = base64encode(local.custom_data)
+  source_image_id = data.hcp_packer_image.webserver.cloud_image_id
 }
 
 # TODO: Load Balancer for web traffic?
