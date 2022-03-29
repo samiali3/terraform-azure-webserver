@@ -98,9 +98,16 @@ resource "tls_private_key" "example" {
 }
 
 
-data "azurerm_image" "image" {
-  name                = "strawbtest-demo-webserver-v0.1.0"
-  resource_group_name = "strawb-packerdemo"
+data "hcp_packer_iteration" "webserver" {
+  bucket_name = var.packer_bucket_name
+  channel     = var.packer_channel
+}
+
+data "hcp_packer_image" "webserver" {
+  bucket_name    = var.packer_bucket_name
+  cloud_provider = "azure"
+  iteration_id   = data.hcp_packer_iteration.webserver.ulid
+  region         = "uksouth" // TODO: the image is only published to this region currently
 }
 
 resource "azurerm_linux_virtual_machine" "example" {
@@ -123,7 +130,7 @@ resource "azurerm_linux_virtual_machine" "example" {
     storage_account_type = "Standard_LRS"
   }
 
-  source_image_id = data.azurerm_image.image.id
+  source_image_id = data.hcp_packer_image.webserver.cloud_image_id
 }
 
 # TODO: Load Balancer for web traffic?
