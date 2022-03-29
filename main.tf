@@ -93,15 +93,14 @@ resource "azurerm_network_interface_security_group_association" "example" {
 # Virtual Machine
 #
 
-locals {
-  custom_data = <<CUSTOM_DATA
-#!/bin/sh
-apt-get -y install nginx
-CUSTOM_DATA
-}
-
 resource "tls_private_key" "example" {
   algorithm = "RSA"
+}
+
+
+data "azurerm_image" "image" {
+  name                = "strawbtest-demo-webserver-v0.1.0"
+  resource_group_name = "strawb-packerdemo"
 }
 
 resource "azurerm_linux_virtual_machine" "example" {
@@ -124,14 +123,7 @@ resource "azurerm_linux_virtual_machine" "example" {
     storage_account_type = "Standard_LRS"
   }
 
-  source_image_reference {
-    publisher = var.virtual_machine_source.publisher
-    offer     = var.virtual_machine_source.offer
-    sku       = var.virtual_machine_source.sku
-    version   = var.virtual_machine_source.version
-  }
-
-  custom_data = base64encode(local.custom_data)
+  source_image_id = data.azurerm_image.image.id
 }
 
 # TODO: Load Balancer for web traffic?
