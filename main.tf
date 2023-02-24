@@ -64,7 +64,7 @@ resource "azurerm_network_security_group" "example" {
     priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
-    protocol                   = "TCP"
+    protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "80"
     source_address_prefix      = "*"
@@ -76,7 +76,7 @@ resource "azurerm_network_security_group" "example" {
     priority                   = 120
     direction                  = "Inbound"
     access                     = "Allow"
-    protocol                   = "TCP"
+    protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
     source_address_prefix      = "*"
@@ -131,6 +131,9 @@ resource "azurerm_linux_virtual_machine" "example" {
   }
 
   source_image_id = data.hcp_packer_image.webserver.cloud_image_id
+
+
+  # TODO: add similar postcondition check to what I added to the AWS webserver module
 }
 
 # TODO: Load Balancer for web traffic?
