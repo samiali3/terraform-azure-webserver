@@ -28,7 +28,7 @@ variable "subnet_address_prefixes" {
 
 variable "packer_bucket_name" {
   type        = string
-  default     = "azure-webserver"
+  default     = "webserver"
   description = "Which HCP Packer bucket should we pull our Machine Image from?"
 }
 
