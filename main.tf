@@ -133,7 +133,12 @@ resource "azurerm_linux_virtual_machine" "example" {
   source_image_id = data.hcp_packer_image.webserver.cloud_image_id
 
 
-  # TODO: add similar postcondition check to what I added to the AWS webserver module
+  lifecycle {
+    postcondition {
+      condition     = self.source_image_id == data.hcp_packer_image.webserver.cloud_image_id
+      error_message = "Newer VM Image available: ${data.hcp_packer_image.webserver.cloud_image_id}"
+    }
+  }
 }
 
 # TODO: Load Balancer for web traffic?
