@@ -3,7 +3,7 @@ terraform {
     organization = "fancycorp"
 
     workspaces {
-      tags = ["webserver", "platform:azure"]
+      tags = ["canary:module:terraform-azure-webserver"]
     }
   }
   # Minimum provider version for OIDC auth
