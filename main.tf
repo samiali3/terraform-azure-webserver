@@ -1,4 +1,7 @@
 terraform {
+  # We're using Terraform Checks
+  required_version = ">= 1.5"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -131,13 +134,12 @@ resource "azurerm_linux_virtual_machine" "example" {
   }
 
   source_image_id = data.hcp_packer_image.webserver.cloud_image_id
+}
 
-
-  lifecycle {
-    postcondition {
-      condition     = self.source_image_id == data.hcp_packer_image.webserver.cloud_image_id
-      error_message = "Newer VM Image available: ${data.hcp_packer_image.webserver.cloud_image_id}"
-    }
+check "latest_image" {
+  assert {
+    condition     = azurerm_linux_virtual_machine.example.source_image_id == data.hcp_packer_image.webserver.cloud_image_id
+    error_message = "Newer VM Image available: ${data.hcp_packer_image.webserver.cloud_image_id}"
   }
 }
 
