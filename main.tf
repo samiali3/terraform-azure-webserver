@@ -100,19 +100,6 @@ resource "tls_private_key" "example" {
   algorithm = "RSA"
 }
 
-
-data "hcp_packer_iteration" "webserver" {
-  bucket_name = var.packer_bucket_name
-  channel     = var.packer_channel
-}
-
-data "hcp_packer_image" "webserver" {
-  bucket_name    = var.packer_bucket_name
-  cloud_provider = "azure"
-  iteration_id   = data.hcp_packer_iteration.webserver.ulid
-  region         = "uksouth" // TODO: the image is only published to this region currently
-}
-
 resource "azurerm_linux_virtual_machine" "example" {
   name                = "example-machine"
   resource_group_name = azurerm_resource_group.example.name
