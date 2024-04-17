@@ -109,7 +109,6 @@ resource "azurerm_linux_virtual_machine" "example" {
   network_interface_ids = [
     azurerm_network_interface.example.id,
   ]
-}
 
   admin_ssh_key {
     username   = "adminuser"
@@ -120,6 +119,7 @@ resource "azurerm_linux_virtual_machine" "example" {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
+}
 
 
 # TODO: Load Balancer for web traffic?
