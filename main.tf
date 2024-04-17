@@ -109,6 +109,7 @@ resource "azurerm_linux_virtual_machine" "example" {
   network_interface_ids = [
     azurerm_network_interface.example.id,
   ]
+}
 
   admin_ssh_key {
     username   = "adminuser"
