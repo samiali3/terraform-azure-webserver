@@ -12,6 +12,8 @@ terraform {
 
 provider "azurerm" {
   features {}
+skip_provider_registration = true
+  use_msi = true
 }
 
 resource "azurerm_resource_group" "example" {
